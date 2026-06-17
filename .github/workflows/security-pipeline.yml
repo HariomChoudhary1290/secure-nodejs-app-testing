@@ -1,5 +1,8 @@
 name: Secure CI/CD Pipeline
 
+permissions:
+  contents: read
+
 on:
   push:
     branches:
@@ -11,58 +14,58 @@ jobs:
 
     steps:
 
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Setup NodeJS
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-    # Gitleaks
-    - name: Run Gitleaks
-      uses: gitleaks/gitleaks-action@v2
+      # Install Dependencies
+      - name: Install Dependencies
+        run: npm install
 
-    # Semgrep
-    - name: Run Semgrep
-      uses: returntocorp/semgrep-action@v1
+      # Gitleaks
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
 
-    # Checkov
-    - name: Run Checkov
-      uses: bridgecrewio/checkov-action@master
-      with:
-        directory: .
+      # Semgrep
+      - name: Run Semgrep
+        uses: returntocorp/semgrep-action@v1
 
-    # Install Dependencies
-    - name: Install Dependencies
-      run: npm install
+      # Checkov
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .
 
-    # NPM Audit
-    - name: Run NPM Audit
-      run: npm audit --audit-level=high
+      # NPM Audit
+      - name: Run NPM Audit
+        run: npm audit --audit-level=high
 
-    # Docker Build
-    - name: Build Docker Image
-      run: |
-        docker build -t secure-nodejs-app:${{ github.run_number }} .
+      # Build Docker Image
+      - name: Build Docker Image
+        run: |
+          docker build -t secure-nodejs-app:${{ github.run_number }} .
 
-    # Trivy Scan
-    - name: Run Trivy Scan
-      uses: aquasecurity/trivy-action@master
-      with:
-        image-ref: secure-nodejs-app:${{ github.run_number }}
-        format: table
-        exit-code: 1
-        severity: CRITICAL,HIGH
+      # Trivy Scan
+      - name: Run Trivy Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: secure-nodejs-app:${{ github.run_number }}
+          format: table
+          exit-code: 1
+          severity: CRITICAL,HIGH
 
-    # Save Image
-    - name: Save Docker Image
-      run: |
-        docker save secure-nodejs-app:${{ github.run_number }} -o app.tar
+      # Save Docker Image as TAR
+      - name: Save Docker Image
+        run: |
+          docker save secure-nodejs-app:${{ github.run_number }} -o app.tar
 
-    # Upload Artifact
-    - name: Upload TAR
-      uses: actions/upload-artifact@v4
-      with:
-        name: app-image
-        path: app.tar
+      # Upload TAR Artifact
+      - name: Upload TAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-image
+          path: app.tar
