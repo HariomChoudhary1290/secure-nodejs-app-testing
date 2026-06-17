@@ -1,0 +1,68 @@
+name: Secure CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  security-scan-build:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup NodeJS
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    # Gitleaks
+    - name: Run Gitleaks
+      uses: gitleaks/gitleaks-action@v2
+
+    # Semgrep
+    - name: Run Semgrep
+      uses: returntocorp/semgrep-action@v1
+
+    # Checkov
+    - name: Run Checkov
+      uses: bridgecrewio/checkov-action@master
+      with:
+        directory: .
+
+    # Install Dependencies
+    - name: Install Dependencies
+      run: npm install
+
+    # NPM Audit
+    - name: Run NPM Audit
+      run: npm audit --audit-level=high
+
+    # Docker Build
+    - name: Build Docker Image
+      run: |
+        docker build -t secure-nodejs-app:${{ github.run_number }} .
+
+    # Trivy Scan
+    - name: Run Trivy Scan
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: secure-nodejs-app:${{ github.run_number }}
+        format: table
+        exit-code: 1
+        severity: CRITICAL,HIGH
+
+    # Save Image
+    - name: Save Docker Image
+      run: |
+        docker save secure-nodejs-app:${{ github.run_number }} -o app.tar
+
+    # Upload Artifact
+    - name: Upload TAR
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-image
+        path: app.tar
