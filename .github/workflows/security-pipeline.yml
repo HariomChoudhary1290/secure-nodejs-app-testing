@@ -55,7 +55,7 @@ jobs:
         with:
           image-ref: secure-nodejs-app:${{ github.run_number }}
           format: table
-          exit-code: 0
+          exit-code: 1
           severity: CRITICAL,HIGH
 
       # Save Docker Image as TAR
