@@ -63,3 +63,35 @@ jobs:
         with:
           name: app-image
           path: app.tar
+
+      - name: Copy TAR to VM
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          source: "app.tar"
+          target: "/home/azureuser/"
+
+      - name: Deploy on VM
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            docker load -i /home/azureuser/app.tar
+
+            IMAGE_ID=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep "secure-nodejs-app" | head -n 1)
+
+            docker tag $IMAGE_ID localhost:5000/secure-nodejs-app:${{ github.run_number }}
+
+            docker push localhost:5000/secure-nodejs-app:${{ github.run_number }}
+
+            docker stop secure-nodejs-app || true
+            docker rm secure-nodejs-app || true
+
+            docker run -d \
+              --name secure-nodejs-app \
+              -p 3000:3000 \
+              localhost:5000/secure-nodejs-app:${{ github.run_number }}
