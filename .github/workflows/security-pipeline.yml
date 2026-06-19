@@ -36,7 +36,7 @@ jobs:
 
       # Checkov
       - name: Run Checkov
-        uses: bridgecrewio/checkov-action@master
+        uses: bridgecrewio/checkov-action@v12
         with:
           directory: .
 
@@ -51,7 +51,7 @@ jobs:
 
       # Trivy Scan
       - name: Run Trivy Scan
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.33.1
         with:
           image-ref: secure-nodejs-app:${{ github.run_number }}
           format: table
