@@ -20,7 +20,7 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
 
       # Install Dependencies
       - name: Install Dependencies
@@ -32,11 +32,11 @@ jobs:
 
       # Semgrep
       - name: Run Semgrep
-        uses: returntocorp/semgrep-action@v1
+        uses: semgrep/semgrep-action@v1
 
       # Checkov
       - name: Run Checkov
-        uses: bridgecrewio/checkov-action@master
+        uses: bridgecrewio/checkov-action@v12
         with:
           directory: .
 
@@ -51,7 +51,7 @@ jobs:
 
       # Trivy Scan
       - name: Run Trivy Scan
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           image-ref: secure-nodejs-app:${{ github.run_number }}
           format: table
