@@ -3,6 +3,9 @@ name: Secure CI/CD Pipeline
 permissions:
   contents: read
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
   push:
     branches:
@@ -22,34 +25,27 @@ jobs:
         with:
           node-version: 24
 
-      # Install Dependencies
       - name: Install Dependencies
         run: npm install
 
-      # Gitleaks
       - name: Run Gitleaks
         uses: gitleaks/gitleaks-action@v2
 
-      # Semgrep
       - name: Run Semgrep
         uses: semgrep/semgrep-action@v1
 
-      # Checkov
       - name: Run Checkov
         uses: bridgecrewio/checkov-action@v12
         with:
           directory: .
 
-      # NPM Audit
       - name: Run NPM Audit
         run: npm audit --audit-level=high
 
-      # Build Docker Image
       - name: Build Docker Image
         run: |
           docker build -t secure-nodejs-app:${{ github.run_number }} .
 
-      # Trivy Scan
       - name: Run Trivy Scan
         uses: aquasecurity/trivy-action@master
         with:
@@ -58,12 +54,10 @@ jobs:
           exit-code: 0
           severity: CRITICAL,HIGH
 
-      # Save Docker Image as TAR
       - name: Save Docker Image
         run: |
           docker save secure-nodejs-app:${{ github.run_number }} -o app.tar
 
-      # Upload TAR Artifact
       - name: Upload TAR
         uses: actions/upload-artifact@v4
         with:
