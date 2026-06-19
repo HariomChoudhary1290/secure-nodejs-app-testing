@@ -16,7 +16,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout Code
         uses: actions/checkout@v4
 
@@ -57,12 +56,13 @@ jobs:
       - name: Save Docker Image
         run: |
           docker save secure-nodejs-app:${{ github.run_number }} -o app.tar
+          chmod 644 app.tar
 
-      - name: Upload TAR
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-image
-          path: app.tar
+      - name: Verify TAR File
+        run: |
+          pwd
+          ls -lah
+          stat app.tar
 
       - name: Copy TAR to VM
         uses: appleboy/scp-action@v0.1.7
@@ -95,3 +95,5 @@ jobs:
               --name secure-nodejs-app \
               -p 3000:3000 \
               localhost:5000/secure-nodejs-app:${{ github.run_number }}
+
+            docker ps
