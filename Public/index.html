@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Secure DevSecOps Pipeline</title>
+
+    <style>
+        body{
+            font-family: Arial;
+            background:#0f172a;
+            color:white;
+            text-align:center;
+            padding-top:100px;
+        }
+
+        .card{
+            width:700px;
+            margin:auto;
+            background:#1e293b;
+            padding:30px;
+            border-radius:12px;
+        }
+
+        h1{
+            color:#38bdf8;
+        }
+
+        ul{
+            text-align:left;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+
+<h1>Secure DevSecOps CI/CD Pipeline</h1>
+
+<p>Application Successfully Deployed on Azure VM</p>
+
+<h2>Security Tools</h2>
+
+<ul>
+<li>Gitleaks - Secrets Detection</li>
+<li>Semgrep - SAST</li>
+<li>Checkov - Infrastructure Security Scan</li>
+<li>NPM Audit - Dependency Scan</li>
+<li>Trivy - Container Security Scan</li>
+</ul>
+
+<h2>Deployment Architecture</h2>
+
+<p>
+GitHub → GitHub Actions → SCP → Azure VM →
+Private Registry → Docker → Nginx → Application
+</p>
+
+</div>
+
+</body>
+</html>
