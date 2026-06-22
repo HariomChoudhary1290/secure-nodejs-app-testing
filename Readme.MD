@@ -1,10 +1,4 @@
 # Secure DevSecOps CI/CD Pipeline for Node.js Application
-
-## Prepared By
-
-**Hariom Choudhary**
-DevOps Engineer Intern
-
 ---
 
 # Executive Summary
@@ -675,19 +669,6 @@ Successfully implemented:
 ✔ Vulnerability Detection
 
 ✔ Secure Deployment Workflow
-
----
-
-# Future Enhancements
-
-* SSL/TLS Implementation
-* HTTPS Configuration
-* Kubernetes Deployment
-* Prometheus Monitoring
-* Grafana Dashboards
-* SonarQube Integration
-* GitOps using ArgoCD
-* Multi-Environment Deployment
 
 ---
 
