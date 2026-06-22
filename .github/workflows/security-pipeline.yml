@@ -80,20 +80,46 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
+            echo "===== Loading Docker Image ====="
             docker load -i /home/azureuser/app.tar
 
-            IMAGE_ID=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep "secure-nodejs-app" | head -n 1)
+            echo "===== Creating Network if Missing ====="
+            docker network create secure-network || true
 
-            docker tag $IMAGE_ID localhost:5000/secure-nodejs-app:${{ github.run_number }}
+            echo "===== Tagging Image for Private Registry ====="
+            docker tag secure-nodejs-app:${{ github.run_number }} localhost:5000/secure-nodejs-app:${{ github.run_number }}
 
+            echo "===== Pushing to Private Registry ====="
             docker push localhost:5000/secure-nodejs-app:${{ github.run_number }}
 
+            echo "===== Pulling Latest Image ====="
+            docker pull localhost:5000/secure-nodejs-app:${{ github.run_number }}
+
+            echo "===== Removing Old Container ====="
             docker stop secure-nodejs-app || true
             docker rm secure-nodejs-app || true
 
+            echo "===== Deploying New Container ====="
             docker run -d \
               --name secure-nodejs-app \
+              --network secure-network \
+              --restart unless-stopped \
               -p 3000:3000 \
               localhost:5000/secure-nodejs-app:${{ github.run_number }}
 
+            echo "===== Connecting Nginx to Network ====="
+            docker network connect secure-network nginx || true
+
+            echo "===== Verification ====="
             docker ps
+
+            echo "===== App Network ====="
+            docker inspect secure-nodejs-app --format='{{json .NetworkSettings.Networks}}'
+
+            echo "===== Nginx Network ====="
+            docker inspect nginx --format='{{json .NetworkSettings.Networks}}'
+
+            echo "===== Restarting Nginx ====="
+            docker restart nginx
+
+            echo "===== Deployment Completed ====="
